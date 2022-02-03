@@ -1,0 +1,37 @@
+- hosts: myserver
+  vars:
+          - image: albirrukp/web-custom
+  tasks:
+          
+          - name: install python docker di Ubuntu
+            apt:
+                    name: "{{ item }}"
+                    state: present
+            loop:
+                    - python3
+                    - python3-docker
+            when: ansible_facts['os_family'] == "Debian"
+
+          - name: install python docker di centos
+            yum:
+                    name: "{{ item }}"
+                    state: present
+            loop:
+                    - python3
+                    - python3-docker
+            when: ansible_facts['os_family'] == "RedHat"
+
+          - name: pull image
+            docker_image:
+                    name: "{{ image }}"
+                    state: present
+                    force: yes
+
+          - name: create container
+            docker_container:
+                    name: web_custom
+                    image: "{{ image }}"
+                    state: started
+                    published_ports:
+                            - 10000:80
+                    recreate: yes
